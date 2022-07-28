@@ -6,7 +6,7 @@ export class TarefasController {
   constructor(private readonly appService: TarefasService) {}
 
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  async getHello(): Promise<any> {
+    return await this.appService.findAll();
   }
 }
