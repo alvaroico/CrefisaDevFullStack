@@ -3,20 +3,20 @@ import { TarefasController } from './tarefas.controller';
 import { TarefasService } from './tarefas.service';
 
 describe('AppController', () => {
-  let appController: TarefasController;
+  let tarefasController: TarefasController;
 
   beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
+    const tarefas: TestingModule = await Test.createTestingModule({
       controllers: [TarefasController],
       providers: [TarefasService],
     }).compile();
 
-    appController = app.get<TarefasController>(TarefasController);
+    tarefasController = tarefas.get<TarefasController>(TarefasController);
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+  describe('Teste Rota Tarefas', () => {
+    it('Lista todas as tarefas', () => {
+      expect(tarefasController.getAll()).toBe([]);
     });
   });
 });

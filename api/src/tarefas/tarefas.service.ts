@@ -6,9 +6,12 @@ import { Tarefas } from './tarefas.entity';
 export class TarefasService {
   constructor(
     @Inject('TAREFAS_REPOSITORY')
-    private photoRepository: Repository<Tarefas>,
+    private tarefasRepository: Repository<Tarefas>,
   ) {}
   async findAll(): Promise<Tarefas[]> {
-    return this.photoRepository.find();
+    return this.tarefasRepository.find();
+  }
+  async create(tarefaString: string): Promise<Tarefas> {
+    return this.tarefasRepository.save(new Tarefas(tarefaString));
   }
 }
