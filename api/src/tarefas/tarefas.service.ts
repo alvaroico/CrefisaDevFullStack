@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { IPutTarefa } from '../interface/put.tarefa.interface';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { Tarefas } from './tarefas.entity';
 
 @Injectable()
@@ -15,7 +15,9 @@ export class TarefasService {
   async create(tarefaString: string): Promise<Tarefas> {
     return this.tarefasRepository.save(new Tarefas(tarefaString));
   }
-  async update(tarefa: IPutTarefa): Promise<any> {
+  async update(
+    tarefa: IPutTarefa,
+  ): Promise<UpdateResult | { mensagem: string }> {
     if (tarefa.id) {
       return this.tarefasRepository.update(
         tarefa.id,
@@ -24,5 +26,8 @@ export class TarefasService {
     } else {
       return { mensagem: 'Id não enviado' };
     }
+  }
+  async delete(id: number): Promise<DeleteResult> {
+    return this.tarefasRepository.delete(id);
   }
 }
