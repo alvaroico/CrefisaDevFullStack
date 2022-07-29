@@ -10,39 +10,51 @@ import {
   ScrollView,
   Platform,
 } from 'react-native';
-import {getAll} from './api/api';
+import {create, deleteTarefa, getAll} from './api/api';
 import Task from './components/Task';
 import {ITarefasAll} from './interfaces/tarefas.api.interface';
 
 export default function App() {
   const [tarefa, setTarefa] = useState();
   const [tarefaItens, setTarefaItens] = useState<ITarefasAll[]>([]);
+  const [update, setUpdate] = useState(1);
 
-  const handleAdicionarTarefa = () => {
+  const handleAdicionarTarefaRecarga = () => {
     Keyboard.dismiss();
-    setTarefaItens([...tarefaItens, tarefa]);
     setTarefa(null);
+    setUpdate(update + 1);
   };
 
-  const completeTask = index => {
-    let itemsCopy = [...tarefaItens];
-    itemsCopy.splice(index, 1);
-    setTarefaItens(itemsCopy);
+  const deletarTarefa = (index: number) => {
+    deleteTarefa(index)
+      .then(result => {
+        handleAdicionarTarefaRecarga();
+      })
+      .catch(err => {
+        console.log(err);
+      });
   };
 
   useEffect(() => {
+    getAll()
+      .then(async response => {
+        const json = (await response.json()) as ITarefasAll[];
+        setTarefaItens(json);
+      })
+      .catch(err => {
+        console.log(err);
+      });
     return () => {
       getAll()
         .then(async response => {
           const json = (await response.json()) as ITarefasAll[];
-
           setTarefaItens(json);
         })
         .catch(err => {
           console.log(err);
         });
     };
-  }, []);
+  }, [update]);
 
   return (
     <View style={styles.container}>
@@ -55,11 +67,11 @@ export default function App() {
             {tarefaItens.map((item, index) => {
               return (
                 <TouchableOpacity
-                  key={item.id}
+                  key={index}
                   onPress={() => {
-                    completeTask(index);
+                    deletarTarefa(item.id);
                   }}>
-                  <Task text={item.description} />
+                  {item ? <Task text={item.description} /> : ''}
                 </TouchableOpacity>
               );
             })}
@@ -75,7 +87,17 @@ export default function App() {
           value={tarefa}
           onChangeText={text => setTarefa(text)}
         />
-        <TouchableOpacity onPress={() => handleAdicionarTarefa()}>
+        <TouchableOpacity
+          onPress={() => {
+            create(tarefa)
+              .then(async criado => {
+                (await criado.json()) as ITarefasAll[];
+                handleAdicionarTarefaRecarga();
+              })
+              .catch(err => {
+                console.log(err);
+              });
+          }}>
           <View style={styles.addWrapper}>
             <Text style={styles.addText}>+</Text>
           </View>
