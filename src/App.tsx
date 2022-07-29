@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   KeyboardAvoidingView,
   StyleSheet,
@@ -10,11 +10,13 @@ import {
   ScrollView,
   Platform,
 } from 'react-native';
+import {getAll} from './api/api';
 import Task from './components/Task';
+import {ITarefasAll} from './interfaces/tarefas.api.interface';
 
 export default function App() {
   const [tarefa, setTarefa] = useState();
-  const [tarefaItens, setTarefaItens] = useState([]);
+  const [tarefaItens, setTarefaItens] = useState<ITarefasAll[]>([]);
 
   const handleAdicionarTarefa = () => {
     Keyboard.dismiss();
@@ -28,6 +30,20 @@ export default function App() {
     setTarefaItens(itemsCopy);
   };
 
+  useEffect(() => {
+    return () => {
+      getAll()
+        .then(async response => {
+          const json = (await response.json()) as ITarefasAll[];
+
+          setTarefaItens(json);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    };
+  }, []);
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -39,9 +55,11 @@ export default function App() {
             {tarefaItens.map((item, index) => {
               return (
                 <TouchableOpacity
-                  key={index}
-                  onPress={() => completeTask(index)}>
-                  <Task text={item} />
+                  key={item.id}
+                  onPress={() => {
+                    completeTask(index);
+                  }}>
+                  <Task text={item.description} />
                 </TouchableOpacity>
               );
             })}
