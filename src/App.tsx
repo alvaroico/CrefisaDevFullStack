@@ -9,8 +9,9 @@ import {
   Keyboard,
   ScrollView,
   Platform,
+  Alert,
 } from 'react-native';
-import {create, deleteTarefa, getAll} from './api/api';
+import {create, deleteTarefa, editarTarefa, getAll} from './api/api';
 import Task from './components/Task';
 import {ITarefasAll} from './interfaces/tarefas.api.interface';
 
@@ -18,6 +19,7 @@ export default function App() {
   const [tarefa, setTarefa] = useState();
   const [tarefaItens, setTarefaItens] = useState<ITarefasAll[]>([]);
   const [update, setUpdate] = useState(1);
+  const [editar, setEditar] = useState(0);
 
   const handleAdicionarTarefaRecarga = () => {
     Keyboard.dismiss();
@@ -56,6 +58,36 @@ export default function App() {
     };
   }, [update]);
 
+  // import {View, StyleSheet, Button, Alert} from 'react-native';
+
+  const showAlert = (index: number, description: string) =>
+    Alert.alert(
+      'Olá',
+      'Gostaria de Deletar ou Editar',
+      [
+        {
+          text: 'Deletar',
+          onPress: () => deletarTarefa(index),
+          style: 'destructive',
+        },
+        {
+          text: 'Editar',
+          onPress: () => {
+            setEditar(index);
+            setTarefa(description);
+          },
+          style: 'default',
+        },
+      ],
+      {
+        cancelable: true,
+        onDismiss: () =>
+          Alert.alert(
+            'This alert was dismissed by tapping outside of the alert dialog.',
+          ),
+      },
+    );
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -69,7 +101,7 @@ export default function App() {
                 <TouchableOpacity
                   key={index}
                   onPress={() => {
-                    deletarTarefa(item.id);
+                    showAlert(item.id, item.description);
                   }}>
                   {item ? <Task text={item.description} /> : ''}
                 </TouchableOpacity>
@@ -89,14 +121,25 @@ export default function App() {
         />
         <TouchableOpacity
           onPress={() => {
-            create(tarefa)
-              .then(async criado => {
-                (await criado.json()) as ITarefasAll[];
-                handleAdicionarTarefaRecarga();
-              })
-              .catch(err => {
-                console.log(err);
-              });
+            if (editar !== 0) {
+              editarTarefa(editar, tarefa)
+                .then(async editado => {
+                  (await editado.json()) as ITarefasAll[];
+                  handleAdicionarTarefaRecarga();
+                })
+                .catch(err => {
+                  console.log(err);
+                });
+            } else {
+              create(tarefa)
+                .then(async criado => {
+                  (await criado.json()) as ITarefasAll[];
+                  handleAdicionarTarefaRecarga();
+                })
+                .catch(err => {
+                  console.log(err);
+                });
+            }
           }}>
           <View style={styles.addWrapper}>
             <Text style={styles.addText}>+</Text>

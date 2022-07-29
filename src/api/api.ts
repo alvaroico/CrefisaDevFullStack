@@ -29,3 +29,17 @@ export const deleteTarefa = async (id: number) => {
     }),
   });
 };
+
+export const editarTarefa = async (id: number, description: string) => {
+  return await fetch('http://172.16.238.11:3000/tarefas', {
+    method: 'PUT',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      id: id,
+      description: description,
+    }),
+  });
+};
